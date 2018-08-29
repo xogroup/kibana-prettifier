@@ -1,0 +1,11 @@
+{
+  "name": "kibana-prettifier",
+  "version": "1.0.0",
+  "description": "Toggle between pretty-printing and minifying JSON in the Kibana UI",
+  "main": "src/manifest.json",
+  "author": "Matt Phillips",
+  "license": "ISC",
+  "devDependencies": {
+    "eslint": "4.x.x"
+  }
+}

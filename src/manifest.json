@@ -1,0 +1,28 @@
+{
+  "name": "Kibana Prettifier",
+  "version": "1.0",
+  "description": "Prettifies JSON in Kibana",
+  "permissions": ["activeTab", "declarativeContent", "storage", "*://*.es.amazonaws.com/_plugin/kibana/app/kibana*"],
+  "background": {
+    "scripts": ["background.js"],
+    "persistent": false
+  },
+  "icons": {
+    "16": "/icons/curly-brackets-16.png",
+    "128": "/icons/curly-brackets-128.png"
+  },
+  "page_action": {
+    "default_popup": "/popup/popup.html"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "*://*.es.amazonaws.com/_plugin/kibana/app/kibana*"
+      ],
+      "js": ["/content-scripts/format-on-render.js"],
+      "run_at": "document_idle",
+      "all_frames": true
+    }
+  ],
+  "manifest_version": 2
+}
