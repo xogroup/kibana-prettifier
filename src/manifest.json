@@ -1,28 +1,27 @@
 {
+  "manifest_version": 2,
   "name": "Kibana Prettifier",
-  "version": "1.0",
+  "version": "1.0.1",
   "description": "Prettifies JSON in Kibana",
+  "author": "Matt Phillips",
   "permissions": ["activeTab", "declarativeContent", "storage", "*://*.es.amazonaws.com/_plugin/kibana/app/kibana*"],
-  "background": {
-    "scripts": ["background.js"],
-    "persistent": false
-  },
   "icons": {
     "16": "/icons/curly-brackets-16.png",
     "128": "/icons/curly-brackets-128.png"
   },
-  "page_action": {
-    "default_popup": "/popup/popup.html"
+  "background": {
+    "scripts": ["/background/background.js"],
+    "persistent": false
   },
   "content_scripts": [
     {
-      "matches": [
-        "*://*.es.amazonaws.com/_plugin/kibana/app/kibana*"
-      ],
-      "js": ["/content-scripts/format-on-render.js"],
+      "matches": ["*://*.es.amazonaws.com/_plugin/kibana/app/kibana*"],
+      "js": ["/content-scripts/content.js"],
       "run_at": "document_idle",
       "all_frames": true
     }
   ],
-  "manifest_version": 2
+  "page_action": {
+    "default_popup": "/popup/popup.html"
+  }
 }

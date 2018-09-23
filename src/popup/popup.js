@@ -1,43 +1,39 @@
 'use strict';
 
 const prettifierCheckbox = document.getElementById('toggle-prettifier');
+const shouldPrettifyKeyName = 'shouldPrettify';
 
-const reformatJson = function(desiredFormat) {
-    const shouldPrettify = desiredFormat === 'pretty';
-
-    chrome.tabs.executeScript(null, {
-        code: `shouldPrettify = ${shouldPrettify};`
-    }, function() {
-        chrome.tabs.executeScript(null, { file: '/content-scripts/reformat-on-toggle.js' });
-    });
-};
-
-const togglePrettifier = function() {
-    const prettifierEnabled = prettifierCheckbox.checked;
-
-    chrome.storage.local.set({ shouldPrettify: prettifierEnabled }, () => {
-        prettifierEnabled ? reformatJson('pretty') : reformatJson('minify');
-    });
-};
-
-const getStoredPrettifiedStatus = function(callback) {
-    const shouldPrettifyKeyName = 'shouldPrettify';
-
-    chrome.storage.local.get(shouldPrettifyKeyName, (items) => {
-        const { shouldPrettify } = items;
+// Gets "shouldPrettify" flag from local storage to initialize the state of the toggle
+const readPrettifiedFlagFromLocalStorage = (setToggleState) => {
+    chrome.storage.local.get(shouldPrettifyKeyName, (storedItems) => {
+        const { shouldPrettify } = storedItems;
 
         if (typeof shouldPrettify !== 'boolean') {
-            // default to true
-            chrome.storage.local.set({ [shouldPrettifyKeyName]: true }, () => callback(true));
+            // Default to true if "shouldPrettify" hasn't been set in local storage yet.
+            chrome.storage.local.set({ [shouldPrettifyKeyName]: true }, () => setToggleState(true));
         } else {
-            return callback(shouldPrettify);
+            return setToggleState(shouldPrettify);
         }
     });
 };
 
-// Set toggle state
-getStoredPrettifiedStatus((shouldPrettify) => {
+// Initialize toggle state
+readPrettifiedFlagFromLocalStorage((shouldPrettify) => {
     prettifierCheckbox.checked = shouldPrettify;
 });
+
+// When the toggle is updated, we will update the state of the "shouldPrettify" flag in local storage then send a message to a listener in our content script.
+const togglePrettifier = () => {
+    const prettifierEnabled = prettifierCheckbox.checked;
+
+    // Update local storage
+    chrome.storage.local.set({ [shouldPrettifyKeyName]: prettifierEnabled }, () => {
+        // Find the active tab in the current window.
+        chrome.tabs.query({active: true, currentWindow: true}, (tabs) => {
+            // Send a "message" to the content script which will listen for them and run a callback function.
+            chrome.tabs.sendMessage(tabs[0].id, {shouldPrettify: prettifierEnabled});
+        });
+    });
+};
 
 prettifierCheckbox.addEventListener('click', togglePrettifier);
